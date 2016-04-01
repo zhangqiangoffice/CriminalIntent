@@ -7,11 +7,18 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.Checkable;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 
 public class CrimeFragment extends Fragment {
 	private Crime mCrime;
 	private EditText mTitleField;
+	private Button mDateButton;
+	private CheckBox mSolvedCheckBox;
 	
 
 	@Override
@@ -47,6 +54,19 @@ public class CrimeFragment extends Fragment {
 				
 			}
 		});
+		
+		mDateButton = (Button) v.findViewById(R.id.crime_date);
+		mDateButton.setText(mCrime.getDate().toString());
+		mDateButton.setEnabled(false);
+		
+		mSolvedCheckBox = (CheckBox) v.findViewById(R.id.crime_solved);
+		mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
+				mCrime.setSolved(arg1);
+				
+			}
+		});
+		
 		return v;
 	}
 }
