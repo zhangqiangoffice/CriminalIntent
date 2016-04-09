@@ -2,12 +2,12 @@ package com.bignerdranch.android.criminalintent;
 
 import java.util.ArrayList;
 
-import android.R.anim;
 import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -161,6 +162,53 @@ public class CrimeListFragment extends ListFragment {
 			registerForContextMenu(listView);
 		} else {
 			listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+			listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+				
+				@Override
+				public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+				
+				@Override
+				public void onDestroyActionMode(ActionMode mode) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+					MenuInflater inflater = mode.getMenuInflater();
+					inflater.inflate(R.menu.crime_list_item_context, menu);
+					return true;
+				}
+				
+				@Override
+				public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+					switch (item.getItemId()) {
+					case R.id.menu_item_delete_crime:
+						CrimeAdapter adapter = (CrimeAdapter) getListAdapter();
+						CrimeLab crimeLab = CrimeLab.get(getActivity());
+						for (int i = adapter.getCount() - 1; i >= 0 ; i--) {
+							if (getListView().isItemChecked(i)) {
+								crimeLab.deleteCrime(adapter.getItem(i));
+							}
+						}
+						mode.finish();
+						adapter.notifyDataSetChanged();
+						return true;
+					default:
+						return false;
+					}
+				}
+				
+				@Override
+				public void onItemCheckedStateChanged(ActionMode mode, int position,
+						long id, boolean checked) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
 		}
 		
 		
