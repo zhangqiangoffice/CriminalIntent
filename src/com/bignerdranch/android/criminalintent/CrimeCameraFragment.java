@@ -1,10 +1,13 @@
 package com.bignerdranch.android.criminalintent;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import android.R.integer;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
@@ -26,6 +29,47 @@ public class CrimeCameraFragment extends Fragment{
 	
 	private Camera mCamera;
 	private SurfaceView mSurfaceView;
+	private View mProgressContainer;
+	
+	private Camera.ShutterCallback mShutterCallback = new Camera.ShutterCallback() {
+		
+		@Override
+		public void onShutter() {
+			mProgressContainer.setVisibility(View.VISIBLE);
+		}
+	};
+	
+	private Camera.PictureCallback mJpegCallback = new Camera.PictureCallback() {
+		
+		@Override
+		public void onPictureTaken(byte[] data, Camera camera) {
+			String filename = UUID.randomUUID().toString() + ".jpg";
+			FileOutputStream os = null;
+			boolean success = true;
+			try {
+				os = getActivity().openFileOutput(filename, Context.MODE_PRIVATE);
+				os.write(data);
+			} catch (Exception e) {
+				Log.e(TAG, "Error writing to file " + filename, e);
+				success = false;
+			} finally {
+				try {
+					if (os != null) {
+						os.close();
+					}
+				} catch (Exception e) {
+					Log.e(TAG, "Error closing file " + filename, e);
+					success = false;
+				}
+			}
+			
+			if (success) {
+				Log.i(TAG, "JPEG saved at " + filename);
+			}
+			getActivity().finish();
+		}
+		
+	};
 	
 	@Override
 	@SuppressWarnings("deprecation")
@@ -33,12 +77,17 @@ public class CrimeCameraFragment extends Fragment{
 			Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.fragment_crime_camera, parent, false);
 		
+		mProgressContainer = v.findViewById(R.id.crime_camera_progressContainer);
+		mProgressContainer.setVisibility(View.INVISIBLE);
+		
 		Button takePictureButton = (Button) v.findViewById(R.id.crime_camera_takePictureButton);
 		takePictureButton.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				getActivity().finish();
+				if (mCamera != null) {
+					mCamera.takePicture(mShutterCallback, null, mJpegCallback);
+				}
 				
 			}
 		});
@@ -76,6 +125,8 @@ public class CrimeCameraFragment extends Fragment{
 				Camera.Parameters parameters = mCamera.getParameters();
 				Size s = getBestSupportedSize(parameters.getSupportedPreviewSizes(), w, h);
 				parameters.setPreviewSize(s.width, s.height);
+				s = getBestSupportedSize(parameters.getSupportedPictureSizes(), w, h);
+				parameters.setPictureSize(s.width, s.height);
 				mCamera.setParameters(parameters);
 				try {
 					mCamera.startPreview();
