@@ -43,7 +43,7 @@ public class CriminalIntentJSONSerializer {
 			}
 			
 		} catch (FileNotFoundException e) {
-			
+			//Log.d("123", "catch e");
 		} finally {
 			if (reader != null) {
 				reader.close();
@@ -55,7 +55,7 @@ public class CriminalIntentJSONSerializer {
 	public void saveCrimes(ArrayList<Crime> crimes) throws JSONException, IOException {
 		JSONArray array = new JSONArray();
 		for (Crime c : crimes) {
-			array.put(c.toString());
+			array.put(c.toJSON());
 		}
 		Writer writer = null;
 		try {

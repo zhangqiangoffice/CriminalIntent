@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.util.Log;
+
 public class Crime {
 	
 	private static final String JSON_ID = "id";

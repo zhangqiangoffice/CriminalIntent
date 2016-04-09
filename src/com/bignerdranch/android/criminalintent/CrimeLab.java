@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class CrimeLab {
 	private static final String TAG = "CrimeLab";
-	private static final String FLENAME = "crimes.json";
+	private static final String FILENAME = "crimes.json";
 	
 	private ArrayList<Crime> mCrimes;
 	private CriminalIntentJSONSerializer mSerializer;
@@ -18,8 +18,7 @@ public class CrimeLab {
 	
 	private CrimeLab (Context appContext) {
 		mAppContext = appContext;
-		mSerializer = new CriminalIntentJSONSerializer(mAppContext, FLENAME);
-		
+		mSerializer = new CriminalIntentJSONSerializer(mAppContext, FILENAME);
 		try {
 			mCrimes = mSerializer.loadCrimes();
 		} catch (Exception e) {
