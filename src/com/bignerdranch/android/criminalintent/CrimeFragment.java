@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 
@@ -40,6 +41,7 @@ public class CrimeFragment extends Fragment {
 	private Button mDateButton;
 	private CheckBox mSolvedCheckBox;
 	private ImageButton mPhotoButton;
+	private ImageView mPhotoView;
 	
 	public void updateDate() {
 		mDateButton.setText(mCrime.getDate().toString());
@@ -133,6 +135,8 @@ public class CrimeFragment extends Fragment {
 			mPhotoButton.setEnabled(false);
 		}
 		
+		mPhotoView = (ImageView) v.findViewById(R.id.crime_imageView);
+		
 		return v;
 	}
 	
@@ -156,6 +160,8 @@ public class CrimeFragment extends Fragment {
 		} else if (requestCode == REQUEST_PHOTO) {
 			String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
 			if (filename != null) {
+				Photo p = new Photo(filename);
+				mCrime.setPhoto(p);
 				Log.i(TAG,  "filename is " + filename);
 			}
 		}
