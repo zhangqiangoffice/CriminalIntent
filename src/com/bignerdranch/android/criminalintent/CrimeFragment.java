@@ -3,6 +3,8 @@ package com.bignerdranch.android.criminalintent;
 import java.util.Date;
 import java.util.UUID;
 
+import com.bignerdranch.android.criminalintent.CrimeListFragment.Callbacks;
+
 import android.R.string;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -51,6 +53,24 @@ public class CrimeFragment extends Fragment {
 	private Button mSuspectButton;
 	private ImageView mPhotoView;
 	
+	private Callbacks mCallbacks;
+	
+	public interface Callbacks {
+		void onCrimeUpdated(Crime crime);
+	}
+	
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		mCallbacks = (Callbacks) activity;
+	}
+	
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		mCallbacks = null;
+	}
+	
 	public void updateDate() {
 		mDateButton.setText(mCrime.getDate().toString());
 	}
@@ -86,20 +106,19 @@ public class CrimeFragment extends Fragment {
 			@Override
 			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
 				mCrime.setTitle(arg0.toString());
-				
+				mCallbacks.onCrimeUpdated(mCrime);
+				getActivity().setTitle(mCrime.getTitle());
 			}
 			
 			@Override
 			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
 					int arg3) {
 				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void afterTextChanged(Editable arg0) {
 				// TODO Auto-generated method stub
-				
 			}
 		});
 		
@@ -121,7 +140,7 @@ public class CrimeFragment extends Fragment {
 		mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			public void onCheckedChanged(CompoundButton arg0, boolean arg1) {
 				mCrime.setSolved(arg1);
-				
+				mCallbacks.onCrimeUpdated(mCrime);
 			}
 		});
 		
@@ -250,12 +269,14 @@ public class CrimeFragment extends Fragment {
 		if (requestCode == REQUEST_DATE) {
 			Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
 			mCrime.setDate(date);
+			mCallbacks.onCrimeUpdated(mCrime);
 			updateDate();
 		} else if (requestCode == REQUEST_PHOTO) {
 			String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
 			if (filename != null) {
 				Photo p = new Photo(filename);
 				mCrime.setPhoto(p);
+				mCallbacks.onCrimeUpdated(mCrime);
 				showPhoto();
 			}
 		} else if (requestCode == REQUEST_CONTACT) {
@@ -272,6 +293,7 @@ public class CrimeFragment extends Fragment {
 			c.moveToFirst();
 			String suspect = c.getString(0);
 			mCrime.setSuspect(suspect);
+			mCallbacks.onCrimeUpdated(mCrime);
 			mSuspectButton.setText(suspect);
 			c.close();
 		}

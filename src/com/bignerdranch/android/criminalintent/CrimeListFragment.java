@@ -3,6 +3,7 @@ package com.bignerdranch.android.criminalintent;
 import java.util.ArrayList;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +28,24 @@ public class CrimeListFragment extends ListFragment {
 	
 	private ArrayList<Crime> mCrimes;
 	private boolean mSubtitleVisible;
+	private Callbacks mCallbacks;
+	
+	public interface Callbacks {
+		void onCrimeSelected(Crime crime);
+	}
+	
+	@Override
+	public void onAttach(Activity activity){
+		super.onAttach(activity);
+		mCallbacks = (Callbacks) activity;
+	}
+	
+	@Override
+	public void onDetach() {
+		super.onDetach();
+		mCallbacks = null;
+	}
+	
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -46,9 +65,7 @@ public class CrimeListFragment extends ListFragment {
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Crime c = ((CrimeAdapter)getListAdapter()).getItem(position);
-		Intent i = new Intent(getActivity(),CrimePagerActivity.class);
-		i.putExtra(CrimeFragment.EXTRA_CRIME_ID, c.getId());
-		startActivity(i);
+		mCallbacks.onCrimeSelected(c);
 	}
 	
 	public class CrimeAdapter extends ArrayAdapter<Crime> {
@@ -101,9 +118,8 @@ public class CrimeListFragment extends ListFragment {
 		case R.id.menu_item_new_crime:
 			Crime crime = new Crime();
 			CrimeLab.get(getActivity()).addCrime(crime);
-			Intent i = new Intent(getActivity(), CrimePagerActivity.class);
-			i.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
-			startActivityForResult(i, 0);
+			((CrimeAdapter)getListAdapter()).notifyDataSetChanged();
+			mCallbacks.onCrimeSelected(crime);
 			return true;
 		case R.id.menu_item_show_subtitle:
 			if (getActivity().getActionBar().getSubtitle() == null) {
@@ -205,14 +221,15 @@ public class CrimeListFragment extends ListFragment {
 				@Override
 				public void onItemCheckedStateChanged(ActionMode mode, int position,
 						long id, boolean checked) {
-					// TODO Auto-generated method stub
-					
+					// TODO Auto-generated method stub			
 				}
 			});
 		}
-		
-		
 		return v;
+	}
+	
+	public void updateUI() {
+		((CrimeAdapter)getListAdapter()).notifyDataSetChanged();
 	}
 	
 	
